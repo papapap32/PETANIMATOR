@@ -1,0 +1,432 @@
+-- Roblox LocalScript (Place in StarterPlayerScripts or StarterGui)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local PetRenameRequest = ReplicatedStorage:WaitForChild("PetRenameRequest")
+
+-- ===== CREATE GUI =====
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PetNameAnimator"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame (Draggable)
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 280, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mainFrame.BackgroundTransparency = 0.05
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+-- Corner rounding
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+-- Title Bar (for dragging)
+local titleBar = Instance.new("Frame")
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = titleBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -35, 1, 0)
+titleLabel.Position = UDim2.new(0, 5, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "✨ Pet Name Animator"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 15
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = titleBar
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 35, 1, 0)
+closeBtn.Position = UDim2.new(1, -35, 0, 0)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.TextSize = 18
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = titleBar
+
+-- ===== CONTENT =====
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -50)
+contentFrame.Position = UDim2.new(0, 10, 0, 45)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+
+-- Text Label
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, 0, 0, 25)
+textLabel.Position = UDim2.new(0, 0, 0, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "📝 Pet Name:"
+textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+textLabel.TextSize = 14
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.Font = Enum.Font.Gotham
+textLabel.Parent = contentFrame
+
+-- TextBox
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(1, 0, 0, 40)
+textBox.Position = UDim2.new(0, 0, 0, 25)
+textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.TextSize = 14
+textBox.Font = Enum.Font.Gotham
+textBox.Text = "TFK - The Feared Killers"
+textBox.PlaceholderText = "Enter pet name..."
+textBox.ClearTextOnFocus = false
+textBox.Parent = contentFrame
+
+local textBoxCorner = Instance.new("UICorner")
+textBoxCorner.CornerRadius = UDim.new(0, 6)
+textBoxCorner.Parent = textBox
+
+-- Speed Label
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, 0, 0, 25)
+speedLabel.Position = UDim2.new(0, 0, 0, 75)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "⚡ Speed: 0.10s"
+speedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+speedLabel.TextSize = 13
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.Parent = contentFrame
+
+-- Speed Slider Container
+local sliderContainer = Instance.new("Frame")
+sliderContainer.Size = UDim2.new(1, 0, 0, 20)
+sliderContainer.Position = UDim2.new(0, 0, 0, 100)
+sliderContainer.BackgroundTransparency = 1
+sliderContainer.Parent = contentFrame
+
+-- Speed Slider Track
+local speedSlider = Instance.new("Frame")
+speedSlider.Size = UDim2.new(1, -20, 0, 4)
+speedSlider.Position = UDim2.new(0, 10, 0.5, -2)
+speedSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+speedSlider.BorderSizePixel = 0
+speedSlider.Parent = sliderContainer
+
+local sliderFill = Instance.new("Frame")
+sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+sliderFill.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+sliderFill.BorderSizePixel = 0
+sliderFill.Parent = speedSlider
+
+local sliderKnob = Instance.new("TextButton")
+sliderKnob.Size = UDim2.new(0, 16, 0, 16)
+sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
+sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderKnob.Text = ""
+sliderKnob.AutoButtonColor = false
+sliderKnob.Parent = speedSlider
+
+local knobCorner = Instance.new("UICorner")
+knobCorner.CornerRadius = UDim.new(1, 0)
+knobCorner.Parent = sliderKnob
+
+local sliderCorner = Instance.new("UICorner")
+sliderCorner.CornerRadius = UDim.new(0, 2)
+sliderCorner.Parent = speedSlider
+
+-- Speed range labels
+local minLabel = Instance.new("TextLabel")
+minLabel.Size = UDim2.new(0, 25, 1, 0)
+minLabel.Position = UDim2.new(0, 0, 0, 0)
+minLabel.BackgroundTransparency = 1
+minLabel.Text = "0.05"
+minLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+minLabel.TextSize = 10
+minLabel.TextXAlignment = Enum.TextXAlignment.Left
+minLabel.Parent = sliderContainer
+
+local maxLabel = Instance.new("TextLabel")
+maxLabel.Size = UDim2.new(0, 25, 1, 0)
+maxLabel.Position = UDim2.new(1, -25, 0, 0)
+maxLabel.BackgroundTransparency = 1
+maxLabel.Text = "0.15"
+maxLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+maxLabel.TextSize = 10
+maxLabel.TextXAlignment = Enum.TextXAlignment.Right
+maxLabel.Parent = sliderContainer
+
+-- Toggle Button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(1, 0, 0, 40)
+toggleBtn.Position = UDim2.new(0, 0, 0, 130)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 100, 70)
+toggleBtn.Text = "▶ ANIMATING"
+toggleBtn.TextColor3 = Color3.fromRGB(100, 255, 100)
+toggleBtn.TextSize = 14
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.Parent = contentFrame
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 8)
+toggleCorner.Parent = toggleBtn
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 20)
+statusLabel.Position = UDim2.new(0, 0, 1, -20)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "⚡ Animating: TFK - T..."
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusLabel.TextSize = 10
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = contentFrame
+
+-- ===== DRAG FUNCTIONALITY =====
+local dragging = false
+local dragStartPos
+local dragStartMousePos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStartMousePos
+    mainFrame.Position = UDim2.new(0, dragStartPos.X.Offset + delta.X, 0, dragStartPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStartPos = mainFrame.Position
+        dragStartMousePos = input.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
+
+-- ===== ANIMATION LOGIC =====
+local enabled = true
+local currentIndex = 0
+local targetName = textBox.Text
+local speed = 0.1
+local animationTask = nil
+local currentDisplayName = ""
+
+local function setPetName(name)
+    local args = { name }
+    PetRenameRequest:FireServer(unpack(args))
+end
+
+local function updateStatus()
+    if not enabled then
+        statusLabel.Text = "⏸ Disabled"
+        return
+    end
+    
+    local displayText = targetName
+    if #displayText > 15 then
+        displayText = displayText:sub(1, 12) .. "..."
+    end
+    statusLabel.Text = "⚡ Animating: " .. displayText .. " (" .. currentIndex .. "/" .. #targetName .. ")"
+end
+
+local function animateLetterByLetter()
+    while enabled do
+        -- Reset index when we complete the name
+        if currentIndex > #targetName then
+            -- Wait a moment at full name
+            setPetName(targetName)
+            task.wait(0.5)
+            
+            -- Clear and reset
+            setPetName("")
+            currentIndex = 0
+            task.wait(0.1)
+        end
+        
+        -- Build name up to current index
+        if currentIndex <= #targetName then
+            currentDisplayName = targetName:sub(1, currentIndex)
+            setPetName(currentDisplayName)
+            updateStatus()
+            
+            -- Move to next letter
+            currentIndex = currentIndex + 1
+            
+            -- Wait before adding next letter
+            task.wait(speed)
+        end
+    end
+end
+
+local function startAnimation()
+    if animationTask then
+        task.cancel(animationTask)
+        animationTask = nil
+    end
+    
+    if not enabled then return end
+    
+    -- Reset animation state
+    currentIndex = 0
+    currentDisplayName = ""
+    
+    -- Start new animation coroutine
+    animationTask = task.spawn(function()
+        animateLetterByLetter()
+    end)
+end
+
+local function stopAnimation()
+    enabled = false
+    if animationTask then
+        task.cancel(animationTask)
+        animationTask = nil
+    end
+    setPetName("")
+    updateStatus()
+end
+
+local function restartAnimation()
+    if animationTask then
+        task.cancel(animationTask)
+        animationTask = nil
+    end
+    
+    if enabled then
+        -- Reset state
+        currentIndex = 0
+        currentDisplayName = ""
+        updateStatus()
+        
+        -- Start fresh animation
+        animationTask = task.spawn(function()
+            animateLetterByLetter()
+        end)
+    end
+end
+
+-- TextBox change detection
+textBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local newText = textBox.Text
+    
+    -- Update target name
+    if newText == "" then
+        targetName = " "
+    else
+        targetName = newText
+    end
+    
+    -- Restart animation with new text
+    if enabled then
+        restartAnimation()
+    end
+    
+    updateStatus()
+end)
+
+-- Toggle button
+toggleBtn.MouseButton1Click:Connect(function()
+    if enabled then
+        -- Disable animation
+        enabled = false
+        stopAnimation()
+        toggleBtn.Text = "⏸ DISABLED"
+        toggleBtn.TextColor3 = Color3.fromRGB(255, 150, 150)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(100, 70, 70)
+        setPetName("")
+    else
+        -- Enable animation
+        enabled = true
+        toggleBtn.Text = "▶ ANIMATING"
+        toggleBtn.TextColor3 = Color3.fromRGB(150, 255, 150)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 100, 70)
+        startAnimation()
+    end
+    updateStatus()
+end)
+
+-- Close button
+closeBtn.MouseButton1Click:Connect(function()
+    if animationTask then
+        task.cancel(animationTask)
+    end
+    setPetName("")
+    screenGui:Destroy()
+end)
+
+-- Speed slider functionality
+local sliderDragging = false
+
+local function updateSpeedFromSlider(input)
+    local relativeX = math.clamp((input.Position.X - speedSlider.AbsolutePosition.X) / speedSlider.AbsoluteSize.X, 0, 1)
+    speed = 0.05 + (relativeX * 0.1)
+    speed = math.clamp(speed, 0.05, 0.15)
+    
+    -- Update visual
+    local percent = (speed - 0.05) / 0.1
+    sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    sliderKnob.Position = UDim2.new(percent, -8, 0.5, -8)
+    speedLabel.Text = "⚡ Speed: " .. string.format("%.2f", speed) .. "s"
+    
+    -- Restart animation with new speed
+    if enabled then
+        restartAnimation()
+    end
+end
+
+sliderKnob.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = true
+        updateSpeedFromSlider(input)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateSpeedFromSlider(input)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = false
+    end
+end)
+
+-- Also allow clicking on the track
+speedSlider.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        updateSpeedFromSlider(input)
+    end
+end)
+
+-- Initialize
+updateSpeedFromSlider({Position = speedSlider.AbsolutePosition + Vector2.new(speedSlider.AbsoluteSize.X * 0.5, 0)})
+startAnimation()
